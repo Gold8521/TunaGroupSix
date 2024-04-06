@@ -1,0 +1,167 @@
+In IOS Daily not able to add daily passes After scanning media number the next screen is last name but its disable
+		/*
+		 * cap.setCapability("platformName", "android"); cap.setCapability("deviceName",
+		 * "Pixel6Pro"); cap.setCapability("udid", "emulator-5554");
+		 * cap.setCapability("appPackage", "com.sixflags.android.snapshot");
+		 * cap.setCapability("appActivity", "com.sixflags.android.MainActivity");
+		 * cap.setCapability("automationName", "UIAutomator2");
+		 * cap.setCapability("noReset", "true"); cap.setCapability("unicodeKeyboard",
+		 * true); cap.setCapability("newCommandTimeout", "1200");
+		 */
+		 
+		 //List<WebElement> name = driver.findElements(AppiumBy.xpath("android.view.View[@resource-id='auto_ParkName']"));
+		List<AndroidElement> name =  driver.findElementByAndroidUIAutomator("new UiSelector().resourceId(\"your_product_list_resource_id\")");
+
+		//System.out.println("Size :-" +name.size());
+		//System.out.println(name);
+
+		Thread.sleep(2000);
+			/*
+		 * WebElement dining = wait.until(ExpectedConditions
+		 * .presenceOfElementLocated(AppiumBy.xpath(
+		 * "//android.view.View[@resource-id='auto_Dining']"))); dining.click();
+		 */
+		 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		 
+		 WebElement selectPark = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//android.view.View[@resource-id='auto_SelectPark']")));
+		Thread.sleep(2000);
+		selectPark.click();
+		WebElement dinning = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//android.widget.TextView[@text=\"Dining\"]")));
+		dinning.click();
+	
+		WebElement mobOrder =wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(@text, 'Offers Mobile Ordering')]::after")));
+		mobOrder.click();
+		Thread.sleep(2000);
+		
+		  List<WebElement> name = driver.findElements(By.xpath(
+		  "android.view.View[@resource-id='auto_ParkName']"));
+		  System.out.println("Name-" + name); 
+		  List<WebElement> parkItem1 = driver.findElements(By.xpath(
+		  "//android.widget.TextView[@resource-id='auto_ParkName']"));
+		  
+		  for (WebElement parkName : parkItem1) {
+		  System.out.println(parkName.getText());
+		  
+		  scroll(ScrollDirection.DOWN, 0.25); parkName.click();
+		  
+		  }
+		  
+		  WebElement FaQ= driver.findElement(By.id("//android.view.View[@resource-id='auto_FAQ']"));
+		js.executeScript("arguments[0].scrollIntoView(true);", FaQ);
+		FaQ.click();
+		
+		
+	@BeforeSuite
+	public void startAppium() throws Throwable {
+		String urlstr = "http://192.168.68.101:";
+
+		AppiumDriverLocalService service;	
+		
+		builder.withIPAddress(urlstr).usingPort(port).withArgument(GeneralServerFlag.SESSION_OVERRIDE);
+
+		service = AppiumDriverLocalService.buildService(builder);
+		URI uri = new URI(urlstr);
+		URL url = uri.toURL();
+		setDriver(new AppiumDriver(url, launchApp()));
+		System.out.println("connecte to app");
+		Thread.sleep(5000);
+
+		if (service.isRunning()) {
+			service.stop();
+			System.out.println("Service started : " + port);
+		}
+		service.start();
+	}
+	
+	
+public class Baseclass {
+	private URL url;
+	private AppiumDriver driver;
+	private static int port = 8582;
+	private static Duration timeout = Duration.ofSeconds(120);
+	private static AppiumDriverLocalService service;
+	private static UiAutomator2Options options;
+	AppiumServiceBuilder builder;
+
+	public AppiumDriver getDriver() {
+		return driver;
+	}
+
+	public UiAutomator2Options options() {
+
+		options = new UiAutomator2Options();
+		options.setPlatformName("Android").setDeviceName("emulator-5554").setPlatformVersion("13.0")
+				.setAppPackage("com.sixflags.android.snapshot").setAppActivity("com.sixflags.android.MainActivity")
+				.setNoReset(true).setEnsureWebviewsHavePages(true).setAutomationName("UIAutomator2")
+				.setNewCommandTimeout(timeout).setNoReset(true);
+		return options;
+
+	}
+	@Test
+	private void sample() {
+		System.out.println(driver);
+	}
+
+	public URL urlsetup() throws Exception {
+		String urlstr = "http://127.0.0.1:";
+		String uri = urlstr + port + "/";
+		URI urli = new URI(uri);
+		url = urli.toURL();
+		return url;
+	}
+	@BeforeSuite
+	public void restartServer(int port) {
+		if (service != null) {
+			if (service.isRunning()) {
+				service.stop();
+				System.out.println("Appium server stopped on port: " + port);
+			}
+			service.start();
+			System.out.println("Appium server started on port: " + port);
+		} else {
+			System.out.println("Appium server not yet started. Starting now...");
+			StartServer();
+		}
+	}
+
+    @BeforeMethod
+    public void setup() throws Exception {
+        options = options();
+        url = urlsetup();
+        driver = new AppiumDriver(url, options);
+    }
+
+	
+	private void checkServer() {
+		if (service != null && service.isRunning()) {
+			service.stop();
+			System.out.println("Appium server stopped.");
+		} else {
+			System.out.println("Appium server was not running.");
+		}
+	}
+
+
+	@BeforeClass
+	private static void StartServer() {
+		AppiumServiceBuilder builder = new AppiumServiceBuilder();
+		builder.withIPAddress("127.0.0.1").usingPort(port).withArgument(GeneralServerFlag.SESSION_OVERRIDE);
+		service = AppiumDriverLocalService.buildService(builder);
+		if (service.isRunning()) {
+			service.stop();
+			System.out.println("Service stoped at : " + port);
+		}
+		service.start();
+		System.out.println("Service started at : " + port);
+	}
+
+	@AfterSuite
+	private void tearDownServer() {
+		if (service != null && service.isRunning()) {
+			service.stop();
+			System.out.println("Appium server stopped.");
+		}
+	}
+
+}
+	
